@@ -1,15 +1,13 @@
+import threading
 import socket
-import logging
 import select
 import time
-import threading
 
 from twotter.entitites import TwotterMessage
 from twotter.utils import encode_message, decode_message, logger
+from twotter.config import SERVER_ADDRESS
 
-
-SERVER_ADDRESS = ('localhost', 12345)
-
+SERVER_NAME = "assistant"
 
 class TwotterServer:
     def __init__(self):
@@ -31,11 +29,10 @@ class TwotterServer:
         while True:
             time.sleep(60)  # Espera 1 minuto
             num_clients = len(self.clients)
-            uptime = int(time.time() - self.start_time)
-            status_msg = f"Servidor online, {num_clients} clientes conectados, uptime: {uptime} segundos"
-            message = encode_message(TwotterMessage(2, 0, 0, "Servidor", status_msg))
+            status_msg = f"Servidor online, {num_clients} clientes conectados"
+            message = encode_message(TwotterMessage(2, 0, 0, SERVER_NAME, status_msg))
             self.send_message_to_all(message)
-            logger.info("Mensagem de status enviada: %s", status_msg)
+            logger.info("Mensagem de status enviada: %s", status_msg)    
 
     def run(self):
         threading.Thread(target=self.periodic_status_message, daemon=True).start()
@@ -59,10 +56,15 @@ class TwotterServer:
             self.handle_error_message(message)
 
     def handle_oi_message(self, message, client_address):
-        self.clients[message.origin_id] = client_address
-        logger.info("Cliente %s (ID %d) entrou do endereço %s", message.username, message.origin_id, client_address)
-        response = encode_message(TwotterMessage(0, message.origin_id, 0, message.username, ''))
-        self.sock.sendto(response, client_address)
+        if message.origin_id not in self.clients:
+            self.clients[message.origin_id] = client_address
+            logger.info("Cliente %s (ID %d) entrou do endereço %s", message.username, message.origin_id, client_address)
+            response = encode_message(TwotterMessage(0, 0, message.origin_id, message.username, ''))
+            self.sock.sendto(response, client_address)
+        else:
+            logger.warning("Cliente %d já está conectado", message.origin_id)
+            response = encode_message(TwotterMessage(3, 0, message.origin_id, SERVER_NAME, "ID de cliente já em uso."))
+            self.sock.sendto(response, client_address)
 
     def handle_tchau_message(self, message):
         if message.origin_id in self.clients:
@@ -73,11 +75,13 @@ class TwotterServer:
         if message.origin_id in self.clients:
             if message.destination_id == 0:
                 self.send_message_to_all(data)
+                logger.info("Mensagem de %s enviada para todos os clientes", message.username)
             else:
                 if message.destination_id in self.clients:
                     self.send_message_to_client(data, message.destination_id)
+                    logger.info("Mensagem de %s enviada para %d", message.username, message.destination_id)
                 else:
-                    error_msg = encode_message(TwotterMessage(3, 0, message.origin_id, "Servidor", "Destinatário não encontrado."))
+                    error_msg = encode_message(TwotterMessage(3, 0, message.origin_id, SERVER_NAME, "Destinatário não encontrado."))
                     self.sock.sendto(error_msg, client_address)
         else:
             logger.warning("Mensagem de origem inválida de %s", client_address)

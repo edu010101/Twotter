@@ -17,4 +17,5 @@ finally:
 
 
 from .entitites.server import TwotterServer
-
+from .entitites.client import TwotterClient
+from .entitites.message import TwotterMessage
