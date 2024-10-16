@@ -1,4 +1,4 @@
-from twotter.entitites import TwotterMessage    
+from twotter.entitites import TwotterMessage, MessageType
 import struct
 
 
@@ -10,6 +10,9 @@ def encode_message(message: TwotterMessage) -> bytes:
     text = message.text[:140].ljust(141, '\0')  
 
     text_size = len(text.encode('utf-8'))
+
+    if type(message.message_type) == MessageType:
+        message.message_type = message.message_type.value
 
     message = struct.pack('!IIII20s141s', message.message_type, message.origin_id, message.destination_id, text_size, username.encode('utf-8'), text.encode('utf-8'))
 

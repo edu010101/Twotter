@@ -30,12 +30,16 @@ class TwotterClient:
     def receive_messages(self):
         while True:
             data, _ = self.sock.recvfrom(1024)
+            
             message = decode_message(data)
 
             message_type = message.message_type
-            if message_type == MessageType.MESSAGE: 
+            if message_type == MessageType.MESSAGE.value:
                 self.received_messages.append(f"{message.username}: {message.text}")
-                st.experimental_rerun()
+                print("REEECEEEEEEEEEEEEEEEEBA")
+                with st.chat_message(message.username):
+                    st.write(message.text)
+
 
     def streamlit_ui(self):
         st.title("Cliente de Chat - UDP")
