@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 import time
 
 import streamlit as st
 
 from twotter import TwotterClient
+from twotter.utils import remove_control_characters
 
 
 class TwotterClientUI:
@@ -26,7 +28,7 @@ class TwotterClientUI:
 
     def setup_sidebar(self):
         with st.sidebar:
-            st.write(f"Seu Usuário: {self.client.username}")
+            st.write(f"Seu Usuário: {remove_control_characters(self.client.username)}")
             st.write(f"Seu ID no servidor: {self.client.client_id}")
             self.destination_id = st.number_input("ID do destinatário (0 para todos)", min_value=0, value=0)
             self.setup_exit_button()

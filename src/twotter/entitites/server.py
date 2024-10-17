@@ -27,7 +27,7 @@ class TwotterServer:
 
     def periodic_status_message(self):
         while True:
-            time.sleep(60)  # Espera 1 minuto
+            time.sleep(60)
             num_clients = len(self.clients)
             status_msg = f"Servidor online, {num_clients} clientes conectados"
             message = encode_message(TwotterMessage(2, 0, 0, SERVER_NAME, status_msg))

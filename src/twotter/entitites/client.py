@@ -1,5 +1,6 @@
 import threading
 import socket
+import time
 
 from twotter.utils import decode_message, encode_message
 from twotter.entitites import TwotterMessage, MessageType
@@ -17,8 +18,29 @@ class TwotterClient:
         self.start()
 
     def start(self):
+        self.connect()
         threading.Thread(target=self.receive_messages, daemon=True).start()
+        
+    def connect(self):
+        timeout = 5
+        start_time = time.time()
         self.send_hello()
+        while not self.accepted:
+            if time.time() - start_time > timeout:
+                print("Tempo de espera excedido")
+                self.sock.close()
+                raise TimeoutError("Tempo de espera excedido")
+            
+            data, _ = self.sock.recvfrom(1024)      
+            message = decode_message(data)
+            
+            if message.message_type == MessageType.HELLO.value:
+                print(f"Cliente {message.username} (ID {message.origin_id}) entrou")
+                self.accepted = True
+            elif message.message_type == MessageType.ERROR.value:
+                print(f"Cliente {message.username} (ID {message.origin_id}) não foi aceito")
+                self.sock.close()    
+                raise ConnectionError("Já existe um cliente com esse ID, Conecte-se com outro ID")
 
     def send_hello(self):
         msg = encode_message(TwotterMessage(MessageType.HELLO, self.client_id, 0, self.username, ''))
@@ -50,7 +72,6 @@ class TwotterClient:
                     print(f"Cliente {message.username} (ID {message.origin_id}) não foi aceito")
                     self.send_bye()
                     self.sock.close()
-                    break
     
     def __del__(self):
         self.send_bye()
