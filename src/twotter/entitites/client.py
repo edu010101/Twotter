@@ -46,6 +46,7 @@ class TwotterClient:
 
         Raises:
             TimeoutError: Se o tempo de espera para aceitação exceder o limite.
+            ConnectionError: Se o ID do cliente já estiver em uso.
         '''
         timeout = 5
         start_time = time.time()

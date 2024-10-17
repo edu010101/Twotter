@@ -8,10 +8,22 @@ from twotter.utils import remove_control_characters
 
 
 class TwotterClientUI:
+    '''
+    Classe que representa a interface do usuário para o cliente Twotter.
+
+    Args:
+        client (TwotterClient): A instância do cliente Twotter.
+
+    Attributes:
+        client (TwotterClient): A instância do cliente Twotter.
+    '''
     def __init__(self, client: TwotterClient):
         self.client = client
 
     def write_received_message(self):
+        '''
+        Escreve as mensagens recebidas na interface do usuário.
+        '''
         with self.messages:
             for msg in self.client.received_messages:
                 msg_text = msg.text

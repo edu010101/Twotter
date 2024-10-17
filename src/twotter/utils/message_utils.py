@@ -4,7 +4,7 @@ import struct
 
 def encode_message(message: TwotterMessage) -> bytes:
     """
-    Encodes a TwotterMessage object into a bytes object.
+    Codifica um objeto TwotterMessage em um objeto bytes.
     """
     username = message.username[:20].ljust(20, '\0')  
     text = message.text[:140].ljust(141, '\0')  
@@ -21,7 +21,7 @@ def encode_message(message: TwotterMessage) -> bytes:
 
 def decode_message(message: bytes) -> TwotterMessage:
     """
-    Decodes a bytes object into a TwotterMessage object.
+    Decodifica um objeto bytes em um objeto TwotterMessage.
     """
     msg_type, origin_id, destination_id, text_size, username, text = struct.unpack('!IIII20s141s', message)
     
@@ -35,5 +35,7 @@ def decode_message(message: bytes) -> TwotterMessage:
                           text)
 
 def remove_control_characters(text):
-    # Remove caracteres que não são imprimíveis (ASCII ou Unicode)
+    '''
+    Remove caracteres que não são imprimíveis (ASCII ou Unicode)
+    '''
     return ''.join(ch for ch in text if ch.isprintable())
