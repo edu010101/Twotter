@@ -1,4 +1,8 @@
 # Twotter
+<!-- Autores: Eduardo Lopes de Lemos e Alberto Y. Hisano Higuti -->
+Se estiver usando o editor de código VSCode é possível visualizar esse arquivo README como se estivesse em um navegador, para isso basta clicar no botão "Open Preview" (ou "Abrir Visualização") no canto superior direito da tela.
+
+Caso contrário, pode-se visualizar esse arquivo README por meio deste [link](https://github.com/edu010101/Twotter.git)
 
 ## Instalação
 
@@ -15,7 +19,7 @@ poetry install
 
 ### Servidor
 
-Para rodar o servidor, basta rodar o comando abaixo:
+Para rodar o servidor, basta executar o comando abaixo:
 
 ```bash
 poetry run python start_server.py
@@ -23,7 +27,7 @@ poetry run python start_server.py
 
 ### Cliente
 
-Para rodar o cliente, basta rodar o comando abaixo:
+Para executar o cliente, deve-se rodar o comando abaixo:
 
 ```bash
 poetry run streamlit run start_client.py

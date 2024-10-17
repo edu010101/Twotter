@@ -6,7 +6,23 @@ from twotter.utils import decode_message, encode_message
 from twotter.entitites import TwotterMessage, MessageType
 
 
-class TwotterClient:
+class TwotterClient:   
+    '''
+    Classe que representa um cliente que se conecta a um servidor UDP.
+
+    Args:
+        server_address (tuple): O endereço do servidor.
+        client_id (int): O ID do cliente.
+        username (str): O nome de usuário do cliente.
+
+    Attributes:
+        server_address (tuple): O endereço do servidor.
+        client_id (int): O ID do cliente.
+        username (str): O nome de usuário do cliente.
+        sock (socket): O socket utilizado para comunicação.
+        received_messages (list): A lista de mensagens recebidas.
+        accepted (bool): Status de aceitação do cliente pelo servidor.
+    '''
     def __init__(self, server_address, client_id, username):
         self.server_address = server_address
         self.client_id = client_id
@@ -18,10 +34,19 @@ class TwotterClient:
         self.start()
 
     def start(self):
+        '''
+        Inicia o cliente, conectando-se ao servidor e iniciando a thread para receber mensagens.
+        '''
         self.connect()
         threading.Thread(target=self.receive_messages, daemon=True).start()
         
     def connect(self):
+        '''
+        Conecta o cliente ao servidor enviando uma mensagem de saudação e aguardando aceitação.
+
+        Raises:
+            TimeoutError: Se o tempo de espera para aceitação exceder o limite.
+        '''
         timeout = 5
         start_time = time.time()
         self.send_hello()
@@ -40,21 +65,37 @@ class TwotterClient:
             elif message.message_type == MessageType.ERROR.value:
                 print(f"Cliente {message.username} (ID {message.origin_id}) não foi aceito")
                 self.sock.close()    
-                raise ConnectionError("Já existe um cliente com esse ID, Conecte-se com outro ID")
+                raise ConnectionError("Já existe um cliente com esse ID, por favor, conecte-se com outro ID")
 
     def send_hello(self):
+        '''
+        Envia uma mensagem de saudação (HELLO) ao servidor.
+        '''
         msg = encode_message(TwotterMessage(MessageType.HELLO, self.client_id, 0, self.username, ''))
         self.sock.sendto(msg, self.server_address)
 
     def send_bye(self):
+        '''
+        Envia uma mensagem de despedida (BYE) ao servidor.
+        '''
         msg = encode_message(TwotterMessage(MessageType.BYE, self.client_id, 0, self.username, ''))
         self.sock.sendto(msg, self.server_address)
 
     def send_message(self, text, destination_id):
+        '''
+        Envia uma mensagem de texto a outro cliente através do servidor.
+
+        Args:
+            text (str): O texto da mensagem a ser enviada.
+            destination_id (int): O ID do cliente destinatário.
+        '''
         msg = encode_message(TwotterMessage(MessageType.MESSAGE, self.client_id, destination_id, self.username, text))
         self.sock.sendto(msg, self.server_address)
 
     def receive_messages(self):
+        '''
+        Recebe mensagens do servidor e processa-as conforme o tipo de mensagem.
+        '''
         while True:
             data, _ = self.sock.recvfrom(1024)
             
