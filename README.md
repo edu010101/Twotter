@@ -15,6 +15,17 @@ cd Twotter
 poetry install
 ```
 
+Caso esteja sendo utilizado o Sistema Operacional Windows será necessário criar um ambiente virtual, e após isso instalar as dependências do projeto. Isso pode ser feito com os seguintes comandos:
+
+```bash
+python -m venv trab_redes
+trab_redes\Scripts\activate
+pip install poetry
+git clone https://github.com/edu010101/Twotter.git
+cd Twotter
+poetry install
+```
+
 ## Execução
 
 ### Servidor
