@@ -42,7 +42,13 @@ class TwotterClientUI:
         with st.sidebar:
             st.write(f"Seu Usuário: {remove_control_characters(self.client.username)}")
             st.write(f"Seu ID no servidor: {self.client.client_id}")
+            
             self.destination_id = st.number_input("ID do destinatário (0 para todos)", min_value=0, value=0)
+            
+            self.setup_space()
+            self.setup_show_online_clients()
+            
+            self.setup_space()
             self.setup_exit_button()
     
     def setup_chat_input(self):
@@ -52,6 +58,10 @@ class TwotterClientUI:
             if self.destination_id != 0 and self.client.client_id != self.destination_id:
                 self.client.send_message(prompt, int(self.client.client_id))
     
+    def setup_show_online_clients(self):
+        self.client.send_get_online_clients()
+        st.write(f"Clientes Online: {self.client.online_users}")
+    
     def setup_exit_button(self):
         exit_button_placeholder = st.sidebar.empty()
         with exit_button_placeholder:
@@ -59,6 +69,12 @@ class TwotterClientUI:
                 self.client.send_bye()
                 st.error("Você saiu do twotter. Reinicia a página para entrar novamente.")
                 st.stop()
+    
+    def setup_space(self):
+        st.write("#")
+        st.write("#")
+        st.write("#")
+        st.write("#")
                 
     def run_chat_ui(self):
         st.title("Twotter Chat")

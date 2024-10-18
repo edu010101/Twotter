@@ -29,6 +29,7 @@ class TwotterClient:
         self.username = username[:20].ljust(20, '\0') 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  
         self.received_messages = []
+        self.online_users = ""
         print("Cliente iniciado")
         self.accepted = False
         self.start()
@@ -92,6 +93,13 @@ class TwotterClient:
         '''
         msg = encode_message(TwotterMessage(MessageType.MESSAGE, self.client_id, destination_id, self.username, text))
         self.sock.sendto(msg, self.server_address)
+    
+    def send_get_online_clients(self):
+        '''
+        Envia uma mensagem ao servidor solicitando a lista de clientes online.
+        '''
+        msg = encode_message(TwotterMessage(MessageType.GET_ONLINE_CLIENTS, self.client_id, 0, self.username, ''))
+        self.sock.sendto(msg, self.server_address)
 
     def receive_messages(self):
         '''
@@ -102,11 +110,15 @@ class TwotterClient:
             
             message = decode_message(data)
             
-            if self.accepted:
+            if self.accepted: # Se o cliente foi aceito
                 message_type = message.message_type
                 if message_type == MessageType.MESSAGE.value:
-                    self.received_messages.append(message)    
-            else:
+                    self.received_messages.append(message)   
+
+                elif message_type == MessageType.GET_ONLINE_CLIENTS.value:
+                    self.online_users = message.text
+            
+            else: # Esperando aceitação
                 if message.message_type == MessageType.HELLO.value:
                     print(f"Cliente {message.username} (ID {message.origin_id}) entrou")
                     self.accepted = True

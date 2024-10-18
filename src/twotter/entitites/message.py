@@ -23,3 +23,4 @@ class MessageType(Enum):
     BYE = 1
     MESSAGE = 2
     ERROR = 3
+    GET_ONLINE_CLIENTS = 4
