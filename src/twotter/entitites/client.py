@@ -118,6 +118,9 @@ class TwotterClient:
                 elif message_type == MessageType.GET_ONLINE_CLIENTS.value:
                     self.online_users = message.text
             
+                elif message_type == MessageType.HELLO.value:
+                    self.send_hello()
+                    
             else: # Esperando aceitação
                 if message.message_type == MessageType.HELLO.value:
                     print(f"Cliente {message.username} (ID {message.origin_id}) entrou")

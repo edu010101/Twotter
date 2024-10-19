@@ -8,6 +8,7 @@ from twotter.utils import encode_message, decode_message, logger
 from twotter.config import SERVER_ADDRESS
 
 SERVER_NAME = "assistant"
+CLIENT_TIMEOUT_IN_SECONDS = 300
 
 class TwotterServer:
     '''
@@ -25,7 +26,8 @@ class TwotterServer:
     '''
     def __init__(self):
         self.clients = {}
-        
+        self.clients_times = {}
+
         self.start_time = time.time()
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind(SERVER_ADDRESS)
@@ -62,6 +64,17 @@ class TwotterServer:
             message = encode_message(TwotterMessage(MessageType.MESSAGE, 0, 0, SERVER_NAME, status_msg))
             self.send_message_to_all(message)
             logger.info("Mensagem de status enviada: %s", status_msg)    
+            self.remove_inactive_clients()
+    
+    def remove_inactive_clients(self):
+        '''
+        Remove clientes inativos por mais de 5 minutos.
+        '''
+        for client_id, last_time in self.clients_times.items():
+            if time.time() - last_time > 300:
+                del self.clients[client_id]
+                del self.clients_times[client_id]
+                logger.warning("Cliente %d removido por inatividade", client_id)
 
     def run(self):
         '''
@@ -107,12 +120,14 @@ class TwotterServer:
         '''
         if message.origin_id not in self.clients:
             self.clients[message.origin_id] = client_address
+            self.clients_times[message.origin_id] = time.time()
             logger.info("Cliente %s (ID %d) entrou do endereço %s", message.username, message.origin_id, client_address)
             response = encode_message(TwotterMessage(MessageType.HELLO, 0, message.origin_id, message.username, ''))
             self.sock.sendto(response, client_address)
         else:
-            logger.warning("Cliente %d já está conectado", message.origin_id)
-            response = encode_message(TwotterMessage(MessageType.ERROR, 0, message.origin_id, SERVER_NAME, "ID de cliente já em uso."))
+            logger.info("Cliente %d já está conectado", message.origin_id)
+            response = encode_message(TwotterMessage(MessageType.ERROR, 0, message.origin_id, SERVER_NAME, "ID de cliente já está conectado."))
+            self.update_client_timer(message.origin_id)
             self.sock.sendto(response, client_address)
 
     def handle_tchau_message(self, message):
@@ -174,4 +189,12 @@ class TwotterServer:
         self.sock.sendto(response, client_address)
         logger.info("Lista de clientes online enviada para %d", message.origin_id)
 
+    def update_client_timer(self, client_id):
+        '''
+        Atualiza o tempo de inatividade do cliente identificado por client_id.
+
+        Args:
+            client_id (int): O ID do cliente.
+        '''
+        self.clients_times[client_id] = time.time()
                     
