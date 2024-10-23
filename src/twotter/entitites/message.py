@@ -14,6 +14,8 @@ class TwotterMessage:
     username: str
     text: str
 
+    def __str__(self) -> str:
+        return f"TwotterMessage({self.message_type}, {self.origin_id}, {self.destination_id}, {self.username}, {self.text})"
 
 class MessageType(Enum):
     """

@@ -61,14 +61,17 @@ class TwotterClient:
             data, _ = self.sock.recvfrom(1024)      
             message = decode_message(data)
             
-            if message.message_type == MessageType.HELLO.value:
+            if int(message.message_type) == MessageType.HELLO.value:
                 print(f"Cliente {message.username} (ID {message.origin_id}) entrou")
                 self.accepted = True
-            elif message.message_type == MessageType.ERROR.value:
+            elif int(message.message_type) == MessageType.ERROR.value:
                 print(f"Cliente {message.username} (ID {message.origin_id}) não foi aceito")
                 self.sock.close()    
                 raise ConnectionError("Já existe um cliente com esse ID, por favor, conecte-se com outro ID")
-
+            else:
+                print("Mensagem inesperada", message)   
+                raise ConnectionError("Mensagem inesperada")
+            
     def send_hello(self):
         '''
         Envia uma mensagem de saudação (HELLO) ao servidor.
