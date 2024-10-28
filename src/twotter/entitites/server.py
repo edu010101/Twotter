@@ -81,14 +81,18 @@ class TwotterServer:
         Inicia o servidor, entrando em um loop para processar mensagens recebidas.
         '''
         threading.Thread(target=self.periodic_status_message, daemon=True).start()
-
+    
         while True:
-            readable, _, _ = select.select([self.sock], [], [], 1)
-            
-            if readable:
-                data, client_address = self.sock.recvfrom(1024)
-                message = decode_message(data)
-                self.handle_message(message, client_address, data)
+            try:
+                readable, _, _ = select.select([self.sock], [], [], 1)
+                
+                if readable:
+                    data, client_address = self.sock.recvfrom(1024)
+                    message = decode_message(data)
+                    self.handle_message(message, client_address, data)
+                    
+            except Exception as e:
+                logger.error("Erro ao processar mensagem: %s", e)
 
     def handle_message(self, message, client_address, data):
         '''

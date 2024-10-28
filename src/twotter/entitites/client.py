@@ -109,29 +109,34 @@ class TwotterClient:
         Recebe mensagens do servidor e processa-as conforme o tipo de mensagem.
         '''
         while True:
-            data, _ = self.sock.recvfrom(1024)
-            
-            message = decode_message(data)
-            
-            if self.accepted: # Se o cliente foi aceito
-                message_type = message.message_type
-                if message_type == MessageType.MESSAGE.value:
-                    self.received_messages.append(message)   
+            try:
+                data, _ = self.sock.recvfrom(1024)
+                
+                message = decode_message(data)
+                
+                if self.accepted: # Se o cliente foi aceito
+                    message_type = message.message_type
+                    if message_type == MessageType.MESSAGE.value:
+                        self.received_messages.append(message)   
 
-                elif message_type == MessageType.GET_ONLINE_CLIENTS.value:
-                    self.online_users = message.text
-            
-                elif message_type == MessageType.HELLO.value:
-                    self.send_hello()
-                    
-            else: # Esperando aceitação
-                if message.message_type == MessageType.HELLO.value:
-                    print(f"Cliente {message.username} (ID {message.origin_id}) entrou")
-                    self.accepted = True
-                elif message.message_type == MessageType.ERROR.value:
-                    print(f"Cliente {message.username} (ID {message.origin_id}) não foi aceito")
-                    self.send_bye()
-                    self.sock.close()
-    
+                    elif message_type == MessageType.GET_ONLINE_CLIENTS.value:
+                        self.online_users = message.text
+                
+                    elif message_type == MessageType.HELLO.value:
+                        self.send_hello()
+                        
+                else: # Esperando aceitação
+                    if message.message_type == MessageType.HELLO.value:
+                        print(f"Cliente {message.username} (ID {message.origin_id}) entrou")
+                        self.accepted = True
+                    elif message.message_type == MessageType.ERROR.value:
+                        print(f"Cliente {message.username} (ID {message.origin_id}) não foi aceito")
+                        self.send_bye()
+                        self.sock.close()
+
+            except Exception as e:
+                print("Erro ao receber mensagem", e)
+                continue
+
     def __del__(self):
         self.send_bye()
