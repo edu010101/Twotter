@@ -34,6 +34,7 @@ def decode_message(message: bytes) -> TwotterMessage:
                           username, 
                           text)
 
+
 def remove_control_characters(text):
     '''
     Remove caracteres que não são imprimíveis (ASCII ou Unicode)
